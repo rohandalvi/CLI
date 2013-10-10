@@ -244,7 +244,7 @@ def start
 	rows = []
 	(1...input.size).each { |i| rows << CSV::Row.new(header, input[i]) }
 
-	@iCount = 59 #@iCount = 0 or rows.length-1
+	@iCount = rows.length-1 #@iCount = 0 or rows.length-1
 	while @iCount>0 #@iCount<rows.length or @iCount> 0
 		if(input[@iCount]!= nil)
 		#puts rows[@iCount]
