@@ -28,7 +28,7 @@
     @projectName = "" #Add Name of Project
     username = "" #Add user to be updated
         
-    currentTeamMembership = get_current_team_membership("Bill Davenport")
+    currentTeamMembership = get_current_team_membership(username)
     
    # puts "Current Team Membership: #{currentTeamMembership.inspect}"
     current = currentTeamMembership.first
