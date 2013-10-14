@@ -8,7 +8,6 @@
     
 =end  
   
-  require 'rally_api_emc_sso'
   require '../CLI/connect.rb'
     
   def build_query(type,fetch,project_ref,string)
