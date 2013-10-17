@@ -10,7 +10,7 @@
   
   require 'rally_api_emc_sso'
   require '../CLI/connect.rb'
-  
+  require 'CSV'
   
   #function to build and execute queries.
     
@@ -25,30 +25,60 @@
     return result
     
   end
+  
+  def manageTeams(row)
+    
+        @names_array = row["Name"].split(",") 
+        $count = 0
+        
+        while $count < @names_array.length
+        
+          currentTeamMembership = get_current_team_membership(@names_array[$count].strip)   
+          
+          current = currentTeamMembership.first
+          h_array = Array.new
+          h_array = current["TeamMemberships"]
+          h_array<<get_project_ref(row["Project"])
+   
+          final = {}
+          
+          final["TeamMemberships"] = h_array #adding array elements to hash for querying.
+          puts "#{final["TeamMemberships"].inspect}"
+          
+          #update query for rally.
+          @rally.update("user",@story["_ref"],final)   
+          
+          $count+=1
+        end 
+    
+  end
 
   #init function
 
   def start
-    #change name of project in connect.rb file
-    @username = "Name of user" #Add user to be updated
-        
-    currentTeamMembership = get_current_team_membership(@username)
     
-   # puts "Current Team Membership: #{currentTeamMembership.inspect}"
-   
-    current = currentTeamMembership.first
-    h_array = Array.new
-    h_array = current["TeamMemberships"]
-    h_array<<get_project_ref
-   
-    puts "h array = #{h_array.inspect}"
- 
-    #declaring hash which will be passed on to the update function   
-    final = {}
-    final["TeamMemberships"] = h_array #adding array elements to hash for querying.
-    puts "#{final["TeamMemberships"].inspect}"
-    #update query for rally.
-    @rally.update("user",@story["_ref"],final)
+    filename = "demo.csv" #input CSV file's name.
+    puts "Getting input CSV.."
+    CSV.foreach("demo.csv", encoding: "bom|utf-8")
+    input = CSV.read(filename)
+    header = input.first
+    
+    rows = []
+    (1...input.size).each { |i| rows << CSV::Row.new(header, input[i]) }
+    
+    puts "Preprocessing..."
+    
+    @iCount = 0
+    @names_array = []
+    
+    rows.each { |row|
+      
+      if(row["Name"]!=nil && row["Project"]!=nil)
+        
+        manageTeams(row)
+      end
+      
+      }
     
     puts "End of Program"   
  end
@@ -56,12 +86,13 @@
   #get list of member teams for a given user.
   
   def get_current_team_membership(displayname)
+    
     #get current team membership for a user    
+    
     result = build_query("User","DisplayName,TeamMemberships","","(DisplayName = \"#{displayname}\")")   
     
     if(result.length!=0)
       @story = result.first
-      puts "Current Team Memberships: #{result.inspect}"
       return result
       
      else
@@ -73,14 +104,13 @@
   
   #get the project object which needs to be added to the list of memberships for the given user.
   
-  def get_project_ref
+  def get_project_ref(projectName)
     
-      result = build_query("Project","Name,Description,ObjectID","","(Name = \"#{@project}\")")
+      result = build_query("Project","Name,Description,ObjectID","","(Name = \"#{projectName}\")")
       puts result.inspect
      
       if(result.length==1)
         project = result.first
-        puts "What is project? #{project.class}"
         return project
         
       else
