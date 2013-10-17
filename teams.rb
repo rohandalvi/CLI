@@ -35,19 +35,23 @@
         
           currentTeamMembership = get_current_team_membership(@names_array[$count].strip)   
           
-          current = currentTeamMembership.first
-          h_array = Array.new
-          h_array = current["TeamMemberships"]
-          h_array<<get_project_ref(row["Project"])
-   
-          final = {}
-          
-          final["TeamMemberships"] = h_array #adding array elements to hash for querying.
-          puts "#{final["TeamMemberships"].inspect}"
-          
-          #update query for rally.
-          @rally.update("user",@story["_ref"],final)   
-          
+          if(currentTeamMembership!=nil)
+           
+            current = currentTeamMembership.first
+            h_array = Array.new
+            h_array = current["TeamMemberships"]
+            h_array<<get_project_ref(row["Project"])
+     
+            
+            final = {}
+            
+            final["TeamMemberships"] = h_array #adding array elements to hash for querying.
+            puts "#{final["TeamMemberships"].inspect}"
+            
+            #update query for rally.
+            @rally.update("user",@story["_ref"],final)   
+            
+          end
           $count+=1
         end 
     
@@ -79,8 +83,12 @@
       end
       
       }
+  
+    
     
     puts "End of Program"   
+    rescue
+      puts "I am rescued"
  end
   
   #get list of member teams for a given user.
@@ -97,8 +105,8 @@
       
      else
        
-       puts "There was some problem getting team membership for this user"
-     
+       puts "There was some problem getting team membership for this user #{displayname}"
+      
      end
   end
   
