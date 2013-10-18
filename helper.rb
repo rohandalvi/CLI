@@ -2,7 +2,6 @@
 
 require 'rally_api_emc_sso'
 require '../CLI/connect.rb'
-require 'timeout'
 
 def build_query(type,fetch,project,string)
   
