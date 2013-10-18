@@ -10,6 +10,8 @@ def build_query(type,fetch,project,string)
   query.type = type
   query.fetch = fetch
   query.query_string = string
+  query.limit=10
+  
   
   result = @rally.find(query)
   
@@ -23,24 +25,10 @@ end
 
 def start
   
-rescue
-  status = Timeout::timeout(180) do
-    
-    @response_plain = http.post(uri.path,@data).body
-  end
-rescue Timeout::Error => e
-  raise "Timer expired -- Waited for too long for response from carrier"
-
-  
-=begin  
-  result = build_query("User","DisplayName,Role,TeamMemberships,UserPermissions","","(TeamMemberships.Name = \"Rohan-test\")" && "(DisplayName = \"Nigel Watkins\")")
-  
-  story = result.first
-  puts story["UserPermissions"].results.first.inspect
-=end  
   get_role_permission()
 
   
+  puts "Done"
 end
 
 def get_role_permission()
@@ -49,8 +37,9 @@ def get_role_permission()
     query.type = :projectpermission
     query.fetch = "Role"
     query.workspace = {"_ref" => "#{get_workspace}"}
-    query.project = {"_ref" => "#{get_project}"}
-    query.query_string="(Role = \"Editor\")"
+    query.query_string="(Role != \"Viewer\")"
+    query.limit=10
+    
     
     result = @rally.find(query)
 
